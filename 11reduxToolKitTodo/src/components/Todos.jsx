@@ -1,9 +1,13 @@
-import React from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { removeTodo, updateTodo } from '../features/todo/todoSlice'
+import React, { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { removeTodo, updateTodo } from '../features/todo/todoSlice';
+
 function Todos() {
-    const todos = useSelector((state) => state.todos)
-    const dispatch = useDispatch()
+    const todos = useSelector((state) => state.todos);
+    const dispatch = useDispatch();
+    const [editableTodoId, setEditableTodoId] = useState(null);
+    const [updateTodoText, setUpdateTodoText] = useState('');
+
     return (
         <>
             <div>Todos</div>
@@ -13,7 +17,12 @@ function Todos() {
                         className="mt-4 flex justify-between items-center bg-zinc-800 px-4 py-2 rounded"
                         key={todo.id}
                     >
-                        <div className='text-white'>{todo.text}</div>
+                        <input
+                            className="text-black"
+                            readOnly={editableTodoId !== todo.id}
+                            value={editableTodoId === todo.id ? updateTodoText : todo.text}
+                            onChange={(e) => setUpdateTodoText(e.target.value)}
+                        />
                         <button
                             onClick={() => dispatch(removeTodo(todo.id))}
                             className="text-white bg-red-500 border-0 py-1 px-4 focus:outline-none hover:bg-red-600 rounded text-md"
@@ -33,11 +42,26 @@ function Todos() {
                                 />
                             </svg>
                         </button>
+                        <button
+                            onClick={() => {
+                                if (editableTodoId === todo.id) {
+                                    dispatch(updateTodo({ id: todo.id, text: updateTodoText }));
+                                    setEditableTodoId(null);
+                                    setUpdateTodoText('');
+                                } else {
+                                    setEditableTodoId(todo.id);
+                                    setUpdateTodoText(todo.text);
+                                }
+                            }}
+                            className="text-white bg-blue-500 border-0 py-1 px-4 focus:outline-none hover:bg-blue-600 rounded text-md"
+                        >
+                            {editableTodoId === todo.id ? 'Save' : 'Edit'}
+                        </button>
                     </li>
                 ))}
             </ul>
         </>
-    )
+    );
 }
 
-export default Todos
+export default Todos;
